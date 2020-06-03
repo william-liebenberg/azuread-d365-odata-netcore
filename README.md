@@ -37,11 +37,12 @@ OAuth2 Access Tokens can now be used for authenticating against Dynamics 365 CRM
 ### OData Query Process
 
 1. Obtain OAuth2 Token as shown above
-2. Set up HTTP Client to use Access Token
-3. Formulate the CRM Uri (`https://mycompany.crm.dynamics.com/api/data/v9.1`) and OData query Uri
-4. Attach the OData query Uri as querystring parameters
-5. Send the GET request
-6. Read JSON Response
-7. Deserialize JSON into Models
+2. Set up HTTP Client
+3. `Authorization` Header value to use OAuth2 token type (usually `Bearer`) and the access token value
+4. Formulate the CRM Uri (e.g. `https://mycompany.crm.dynamics.com/api/data/v9.1`) and OData query Uri
+5. Attach the OData query Uri as querystring parameters
+6. Send the GET request
+7. Read JSON Response
+8. Deserialize JSON into Models
 
 DONE.
