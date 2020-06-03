@@ -12,9 +12,9 @@ using Newtonsoft.Json;
 
 namespace D365_AzureAD_ODataQuery
 {
-	public class OAuth2IoAuth2TokenProvider : IOAuth2TokenProvider<OAuth2Token>
+	public class OAuth2TokenProvider : IOAuth2TokenProvider<OAuth2Token>
 	{
-		private readonly ILogger<OAuth2IoAuth2TokenProvider> _logger;
+		private readonly ILogger<OAuth2TokenProvider> _logger;
 		private readonly IHttpClientFactory _clientFactory;
 		private readonly IDistributedCache _cache;
 
@@ -24,8 +24,8 @@ namespace D365_AzureAD_ODataQuery
 		private readonly string _tokenUrl;
 		private readonly string _cacheKey = "Token_" + Guid.NewGuid().ToString("N");
 
-		public OAuth2IoAuth2TokenProvider(
-			ILogger<OAuth2IoAuth2TokenProvider> logger,
+		public OAuth2TokenProvider(
+			ILogger<OAuth2TokenProvider> logger,
 			IConfiguration config,
 			IHttpClientFactory clientFactory,
 			IDistributedCache cache)
