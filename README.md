@@ -1,4 +1,4 @@
-# AzureAD Authentication for Dynamics 365 to execute OData queries using .NET Core
+# Azure AD Authentication for Dynamics 365 to execute OData queries using .NET Core
 
 ## How to obtain an Access Token for Dynamics 365 CRM
 
