@@ -2,7 +2,7 @@
 
 ## How to obtain an Access Token for Dynamics 365 CRM
 
-### Azure AD Authentication Pre-requisites
+### Azure AD Authentication prerequisite
 
 * `Azure Tenant ID`
 * `Dynamics 365 CRM URL`
@@ -30,7 +30,7 @@ OAuth2 Access Tokens can now be used for authenticating against Dynamics 365 CRM
 
 ## How to execute an OData query against Dynamics 365 CRM
 
-### OData Query Pre-requisites
+### OData Query prerequisite
 
 * Valid Access Token
 
