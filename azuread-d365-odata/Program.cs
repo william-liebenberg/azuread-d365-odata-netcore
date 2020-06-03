@@ -35,6 +35,10 @@ namespace D365_AzureAD_ODataQuery
 			services.AddSingleton<Application>();
 
 			// Add other services
+			services.AddHttpClient();
+			services.AddDistributedMemoryCache();
+
+			services.AddSingleton<IOAuth2TokenProvider<OAuth2Token>, OAuth2IoAuth2TokenProvider>();
 		}
 
 		private static void ConfigureLogging(IServiceCollection services, IConfigurationRoot config)

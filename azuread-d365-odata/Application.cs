@@ -1,40 +1,62 @@
-﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace D365_AzureAD_ODataQuery
 {
 	public class Application
 	{
 		private readonly ILogger<Application> _logger;
+		private readonly IConfiguration _config;
+		private readonly IOAuth2TokenProvider<OAuth2Token> _tokenProvider;
+		private readonly IHttpClientFactory _httpClientFactory;
 
-		private readonly string _azureTenantId;
-		private readonly string _applicationId;
-		private readonly string _applicationSecret;
-		private readonly string _scope;
-		private readonly string _tokenUrl;
-
-		public Application(ILogger<Application> logger, IConfiguration config)
+		public Application(ILogger<Application> logger, IConfiguration config, IOAuth2TokenProvider<OAuth2Token> tokenProvider, IHttpClientFactory httpClientFactory)
 		{
 			_logger = logger;
-
-			_applicationId = config["ApplicationId"];
-			_applicationSecret = config["ApplicationSecret"];
-
-			_azureTenantId = config["AzureTenantId"];
-			_tokenUrl = $"https://login.microsoftonline.com/{_azureTenantId}/oauth2/v2.0/token";
-			
-			string crmUrl = config["CrmUrl"];
-			string scope = config["Scope"];
-			_scope = $"https://{crmUrl}/{scope}";
+			_config = config;
+			_tokenProvider = tokenProvider;
+			_httpClientFactory = httpClientFactory;
 		}
 
+		/// <summary>
+		/// Makes a HTTP call to the OAuth2 endpoint for getting the OAuth2 token that can be used for further HTTP communication with Dynamics 365.
+		/// </summary>
 		public async Task<bool> Run(string[] args)
 		{
-			_logger.LogInformation("Hello world!");
-			_logger.LogInformation("ApplicationId: " + _applicationId);
-			_logger.LogInformation("TokenUrl: " + _tokenUrl);
-			_logger.LogInformation("Scope: " + _scope);
+			CancellationToken cancellationToken = CancellationToken.None;
+
+			// get the auth token
+			OAuth2Token token = await _tokenProvider.GetToken(cancellationToken);
+
+			// set up our http client
+			using HttpClient client = _httpClientFactory.CreateClient();
+			client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(token.TokenType, token.AccessToken);
+			
+			// formulate the odata query uri
+			var crmBaseUrl = new Uri("https://" + _config["CrmUrl"], UriKind.Absolute);
+			var apiUrl = new Uri(crmBaseUrl, "api/data/v9.1/");
+			Uri odataQueryUri = new Uri(apiUrl, "systemusers").AttachParameters(new NameValueCollection
+			{
+				{"$filter", "contains(firstname,%27william%27)%20and%20contains(lastname,%27liebenberg%27)"}
+			});
+
+			// get the odata response
+			HttpResponseMessage odataResponse = await client.GetAsync(odataQueryUri, cancellationToken);
+			string odataJson = await odataResponse.Content.ReadAsStringAsync();
+
+			// deserialize the odata json
+			var systemUsers = JsonConvert.DeserializeObject<SystemUsers>(odataJson);
+			SystemUser william = systemUsers.Users.First();
+			_logger.LogInformation("Twitter Username: {twitterUsername}", william.SswTwitterusername);
+
 			return await Task.FromResult(true);
 		}
 	}
